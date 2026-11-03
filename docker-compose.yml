@@ -1,0 +1,28 @@
+# Runs PostgreSQL and the app together.
+# Set a password first:  export POSTGRES_PASSWORD='pick-something-long'
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: subs
+      POSTGRES_DB: subscriptions
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD first}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subs -d subscriptions"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/subscriptions
+      DB_USER: subs
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
