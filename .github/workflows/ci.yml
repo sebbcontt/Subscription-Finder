@@ -18,6 +18,9 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
+      # Newer Docker versions reject the old API version that this Testcontainers
+      # release asks for, so tell it which version to use.
+      - run: echo "api.version=1.44" > ~/.docker-java.properties
       # Runs the unit tests, then the integration tests against PostgreSQL in Docker.
       - run: mvn -B verify
 
